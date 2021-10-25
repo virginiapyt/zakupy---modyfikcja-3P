@@ -4,26 +4,36 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private ArrayList<Product> products = new ArrayList<>();
     private RecyclerView recyclerView;
     private ShoppingAdapter shoppingAdapter;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        products.add(new Product("mleko"));
-        products.add(new Product("jajka"));
+        sharedPreferences = getPreferences(MODE_PRIVATE);
+
+        products = loadProducts();
+        //products.add(new Product("mleko"));
+        //products.add(new Product("jajka"));
 
 
 
@@ -61,5 +71,34 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private ArrayList<Product> loadProducts() {
+        String fromGson = sharedPreferences.getString("dane","");
+        //deserializacja danych
+        Gson gson = new Gson();
+        Type typ = new TypeToken<List<Product>>(){}.getType();
+
+        ArrayList<Product> products = gson.fromJson(fromGson, typ);
+
+        if (products == null){
+            products = new ArrayList<>();
+        }
+
+        return products;
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveProducts();
+    }
+
+    private void saveProducts() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String productAsJson = gson.toJson(products);
+        editor.putString("dane", productAsJson);
+        editor.apply();
     }
 }
