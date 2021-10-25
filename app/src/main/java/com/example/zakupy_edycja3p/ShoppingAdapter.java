@@ -1,10 +1,12 @@
 package com.example.zakupy_edycja3p;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +23,17 @@ public class ShoppingAdapter extends RecyclerView.Adapter<ShoppingAdapter.Produc
         inflater = LayoutInflater.from(context);
     }
 
+    public void addProduct(Product prod){
+        products.add(prod);
+        notifyItemInserted(products.size()-1);  //informujemy adapter ze na koncu jest nowy element
+
+    }
+
+    public void delProduct(){
+        boolean b = products.removeIf(x-> x.isChecked());
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ProductViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -34,6 +47,20 @@ public class ShoppingAdapter extends RecyclerView.Adapter<ShoppingAdapter.Produc
     Product current_prod = products.get(position);
     holder.checkBoxItem.setText(current_prod.getName());
     holder.checkBoxItem.setChecked(current_prod.isChecked());
+
+    holder.checkBoxItem.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        @Override
+        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+            current_prod.setChecked(b);
+            if (b){
+                holder.checkBoxItem.setPaintFlags(holder.checkBoxItem.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            }
+            else{
+                holder.checkBoxItem.setPaintFlags(holder.checkBoxItem.getPaintFlags() & ~Paint.STRIKE_THRU_TEXT_FLAG);
+            }
+        }
+    });
+
     }
 
     @Override
